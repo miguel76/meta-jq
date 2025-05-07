@@ -1,2 +1,4 @@
-include "./ast-to-string";
+include "./algebra-to-string";
 include "./traverse";
+include "./ast-to-algebra";
+
