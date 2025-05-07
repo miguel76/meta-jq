@@ -26,11 +26,19 @@ def algebra_tostring($space):
         end;
 
     def serialize_json:
-        to_entries | "{\(
-            [ .[] | 
-                "\(new_line)\(.key): \(.value)"
-            ] | join(", ") | indent_block
-        )}";
+        if $indent_str then
+            (objects |
+                to_entries | "{\(
+                    [ .[] | 
+                        "\(new_line)\(.key): \(.value | serialize_json)"
+                    ] | join(", ") | indent_block
+                )}"
+            ) //
+            (arrays | join(", ")) //
+            tojson
+        else
+            tojson
+        end;
 
     def serialize_keyvals:
         "{\(
