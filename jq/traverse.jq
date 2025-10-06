@@ -1,21 +1,34 @@
 def traverse_expr(visit_expr; visit_pattern; visit_import; visit_func_def):
     def _pattern:
         if .array then .array |= [.[] | _pattern]
-        elif .object then .object |= [.[] | .val |= _pattern]
+        elif .object then .object |= [.[] |
+            if .val then
+                .val |= _pattern
+            end
+        ]
         end | visit_pattern;
     def _f:
-        debug |
         if .imports then
             .imports |= [.[] | visit_import]
         end |
         if .func_defs then
             .func_defs |= [.[] | .body |= _f | visit_func_def]
         end |
-        if .type == "String" or .type == "Format" then
-            if .queries then
-                .queries |= [.[] | _f]
+        if .type == "Format" then
+            if .str then
+                .str |= _f
             end
+        elif .type == "StringInterpolation" then
+            if .fragments then
+                .fragments |= [.[] | _f]
+            end
+        elif .type == "InterpolatedString" then
+            .query |= _f
         elif .type == "Index" then
+            .index |= _f 
+        elif .type == "Key" then
+            if .query then .query |= _f end
+        elif .type == "Slice" then
             if .start then .start |= _f end |
             if .end then .end |= _f end
         elif .type == "Func" then
@@ -49,6 +62,10 @@ def traverse_expr(visit_expr; visit_pattern; visit_import; visit_func_def):
             (.pattern |= _pattern) |
             (.start |= _f) |
             (.update |= _f)
+        elif .type == "Bind" then
+            (.scope |= _f) |
+            (.value |= _f) |
+            (.patterns |= [.[] | _pattern])
         elif .type == "Try" then
             (.body |= _f) |
             if .catch then .catch |= _f end
@@ -58,7 +75,7 @@ def traverse_expr(visit_expr; visit_pattern; visit_import; visit_func_def):
             (.leftOperand |= _f) |
             (.rightOperand |= _f)
         elif .type == "NaryOp" then
-            .operands |= [.[] | _f] | debug
+            .operands |= [.[] | _f]
         end |
         visit_expr;
     _f;

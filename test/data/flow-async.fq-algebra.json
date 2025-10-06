@@ -1,0 +1,602 @@
+{
+  "func_defs": [
+    {
+      "body": {
+        "type": "Identity"
+      },
+      "name": "publishContent"
+    },
+    {
+      "body": {
+        "key_vals": [
+          {
+            "key": "result",
+            "val": {
+              "query": {
+                "op": ",",
+                "operands": [
+                  {
+                    "type": "Identity"
+                  },
+                  {
+                    "type": "Iterator"
+                  },
+                  {
+                    "type": "Identity"
+                  }
+                ],
+                "type": "NaryOp"
+              },
+              "type": "Array"
+            }
+          },
+          {
+            "key": "ciccio",
+            "val": {
+              "query": {
+                "name": "empty",
+                "type": "Func"
+              },
+              "type": "Array"
+            }
+          }
+        ],
+        "type": "Object"
+      },
+      "name": "publishPage"
+    }
+  ],
+  "imports": [
+    {
+      "import_alias": "cicius",
+      "import_path": "ciccio",
+      "meta": {
+        "info": "cicciomede"
+      }
+    },
+    {
+      "import_alias": "$birimbo",
+      "import_path": "bimbo",
+      "meta": {
+        "furbo": {
+          "ah": [
+            4
+          ],
+          "meno": 1,
+          "ops": null,
+          "piu": 1
+        },
+        "main": "bubolo",
+        "quattro": false,
+        "rumba": 4
+      }
+    },
+    {
+      "include_path": "included",
+      "meta": {
+        "isIncluded": true
+      }
+    }
+  ],
+  "meta": {
+    "descr": "aloha"
+  },
+  "op": "|",
+  "operands": [
+    {
+      "name": "classes",
+      "type": "Key"
+    },
+    {
+      "name": "Philosopher",
+      "optional": true,
+      "type": "Key"
+    },
+    {
+      "index": {
+        "type": "Literal",
+        "value": 35
+      },
+      "type": "Index"
+    },
+    {
+      "start": {
+        "type": "Literal",
+        "value": 35
+      },
+      "type": "Slice"
+    },
+    {
+      "leftOperand": {
+        "leftOperand": {
+          "leftOperand": {
+            "type": "Literal",
+            "value": 4
+          },
+          "op": "+",
+          "rightOperand": {
+            "type": "Literal",
+            "value": 5
+          },
+          "type": "BinaryOp"
+        },
+        "op": "*",
+        "rightOperand": {
+          "type": "Literal",
+          "value": 6
+        },
+        "type": "BinaryOp"
+      },
+      "op": "+",
+      "rightOperand": {
+        "type": "Literal",
+        "value": 5
+      },
+      "type": "BinaryOp"
+    },
+    {
+      "query": {
+        "op": ",",
+        "operands": [
+          {
+            "type": "Literal",
+            "value": 4
+          },
+          {
+            "leftOperand": {
+              "type": "Literal",
+              "value": 5
+            },
+            "op": "+",
+            "rightOperand": {
+              "type": "Literal",
+              "value": 6
+            },
+            "type": "BinaryOp"
+          }
+        ],
+        "type": "NaryOp"
+      },
+      "type": "Array"
+    },
+    {
+      "leftOperand": {
+        "name": "a",
+        "type": "Key"
+      },
+      "op": "|=",
+      "rightOperand": {
+        "leftOperand": {
+          "type": "Identity"
+        },
+        "op": "+",
+        "rightOperand": {
+          "type": "Literal",
+          "value": 42
+        },
+        "type": "BinaryOp"
+      },
+      "type": "BinaryOp"
+    },
+    {
+      "type": "Literal",
+      "value": true
+    },
+    {
+      "type": "Literal",
+      "value": false
+    },
+    {
+      "name": "who",
+      "type": "Key"
+    },
+    {
+      "index": {
+        "op": ",",
+        "operands": [
+          {
+            "type": "Literal",
+            "value": 3
+          },
+          {
+            "type": "Literal",
+            "value": 5
+          },
+          {
+            "type": "Literal",
+            "value": 7
+          }
+        ],
+        "type": "NaryOp"
+      },
+      "type": "Index"
+    },
+    {
+      "name": "pippo",
+      "type": "Key"
+    },
+    {
+      "type": "Iterator"
+    },
+    {
+      "op": "//",
+      "operands": [
+        {
+          "name": "rido",
+          "type": "Key"
+        },
+        {
+          "name": "piango",
+          "type": "Key"
+        },
+        {
+          "op": "|",
+          "operands": [
+            {
+              "name": "serie",
+              "type": "Key"
+            },
+            {
+              "index": {
+                "type": "Literal",
+                "value": 3
+              },
+              "type": "Index"
+            }
+          ],
+          "type": "NaryOp"
+        }
+      ],
+      "type": "NaryOp"
+    },
+    {
+      "patterns": [
+        {
+          "object": [
+            {
+              "key": "$a"
+            },
+            {
+              "key": "$b"
+            },
+            {
+              "key": "c",
+              "val": {
+                "object": [
+                  {
+                    "key": "$d"
+                  },
+                  {
+                    "key": "$e"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "object": [
+            {
+              "key": "$a"
+            },
+            {
+              "key": "$b"
+            },
+            {
+              "key": "c",
+              "val": {
+                "array": [
+                  {
+                    "object": [
+                      {
+                        "key": "$d"
+                      },
+                      {
+                        "key": "$e"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "object": [
+            {
+              "key": "$a"
+            },
+            {
+              "key": "$b"
+            },
+            {
+              "key": "c",
+              "val": {
+                "array": [
+                  {
+                    "array": [
+                      {
+                        "object": [
+                          {
+                            "key": "$d"
+                          },
+                          {
+                            "key": "$e"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "scope": {
+        "op": "|",
+        "operands": [
+          {
+            "key_vals": [
+              {
+                "key": "$a"
+              },
+              {
+                "key": "$b"
+              },
+              {
+                "key": "$d"
+              },
+              {
+                "key": "$e"
+              }
+            ],
+            "type": "Object"
+          },
+          {
+            "patterns": [
+              {
+                "name": "$pasticcio"
+              }
+            ],
+            "scope": {
+              "op": "|",
+              "operands": [
+                {
+                  "key_vals": [
+                    {
+                      "key": "title",
+                      "val": {
+                        "type": "Literal",
+                        "value": "A list of ancient philosophers"
+                      }
+                    },
+                    {
+                      "key": "contentURIs",
+                      "val": {
+                        "query": {
+                          "op": "|",
+                          "operands": [
+                            {
+                              "name": "hasInstance",
+                              "type": "Key"
+                            },
+                            {
+                              "type": "Iterator"
+                            },
+                            {
+                              "args": [
+                                {
+                                  "leftOperand": {
+                                    "name": "birthDate",
+                                    "type": "Key"
+                                  },
+                                  "op": "<",
+                                  "rightOperand": {
+                                    "type": "Literal",
+                                    "value": "500-01-01T00:00:00Z"
+                                  },
+                                  "type": "BinaryOp"
+                                }
+                              ],
+                              "name": "select",
+                              "type": "Func"
+                            },
+                            {
+                              "key_vals": [
+                                {
+                                  "key": "id",
+                                  "val": {
+                                    "name": "id",
+                                    "type": "Key"
+                                  }
+                                },
+                                {
+                                  "key": "name",
+                                  "val": {
+                                    "fragments": [
+                                      {
+                                        "query": {
+                                          "name": "firstName",
+                                          "type": "Key"
+                                        },
+                                        "type": "InterpolatedString"
+                                      },
+                                      {
+                                        "type": "FixedString",
+                                        "value": " "
+                                      },
+                                      {
+                                        "query": {
+                                          "name": "familyName",
+                                          "type": "Key"
+                                        },
+                                        "type": "InterpolatedString"
+                                      }
+                                    ],
+                                    "type": "StringInterpolation"
+                                  }
+                                },
+                                {
+                                  "key": "duo",
+                                  "val": {
+                                    "op": "|",
+                                    "operands": [
+                                      {
+                                        "type": "Literal",
+                                        "value": "pippo"
+                                      },
+                                      {
+                                        "format": "@base64",
+                                        "type": "Format"
+                                      }
+                                    ],
+                                    "type": "NaryOp"
+                                  }
+                                },
+                                {
+                                  "key": "trio",
+                                  "val": {
+                                    "format": "@uri",
+                                    "str": {
+                                      "type": "Literal",
+                                      "value": "pluto"
+                                    },
+                                    "type": "Format"
+                                  }
+                                },
+                                {
+                                  "key": "students",
+                                  "val": {
+                                    "query": {
+                                      "op": "|",
+                                      "operands": [
+                                        {
+                                          "name": "hasStudent",
+                                          "type": "Key"
+                                        },
+                                        {
+                                          "type": "Iterator"
+                                        },
+                                        {
+                                          "name": "id",
+                                          "type": "Key"
+                                        }
+                                      ],
+                                      "type": "NaryOp"
+                                    },
+                                    "type": "Array"
+                                  }
+                                },
+                                {
+                                  "key": "studentsOfStudents",
+                                  "val": {
+                                    "query": {
+                                      "op": "|",
+                                      "operands": [
+                                        {
+                                          "name": "hasStudent",
+                                          "type": "Key"
+                                        },
+                                        {
+                                          "type": "Iterator"
+                                        },
+                                        {
+                                          "name": "hasStudent",
+                                          "type": "Key"
+                                        },
+                                        {
+                                          "type": "Iterator"
+                                        },
+                                        {
+                                          "name": "id",
+                                          "type": "Key"
+                                        }
+                                      ],
+                                      "type": "NaryOp"
+                                    },
+                                    "type": "Array"
+                                  }
+                                }
+                              ],
+                              "type": "Object"
+                            },
+                            {
+                              "name": "publishContent",
+                              "type": "Func"
+                            },
+                            {
+                              "format": "@url",
+                              "str": {
+                                "fragments": [
+                                  {
+                                    "type": "FixedString",
+                                    "value": "https://example.org/"
+                                  },
+                                  {
+                                    "query": {
+                                      "name": "reference",
+                                      "type": "Key"
+                                    },
+                                    "type": "InterpolatedString"
+                                  }
+                                ],
+                                "type": "StringInterpolation"
+                              },
+                              "type": "Format"
+                            }
+                          ],
+                          "type": "NaryOp"
+                        },
+                        "type": "Array"
+                      }
+                    }
+                  ],
+                  "type": "Object"
+                },
+                {
+                  "name": "publishPage",
+                  "type": "Func"
+                },
+                {
+                  "name": "result",
+                  "type": "Key"
+                },
+                {
+                  "op": "-",
+                  "operand": {
+                    "type": "Literal",
+                    "value": 6
+                  },
+                  "type": "UnaryOp"
+                }
+              ],
+              "type": "NaryOp"
+            },
+            "type": "Bind",
+            "value": {
+              "op": "|",
+              "operands": [
+                {
+                  "name": "ciccio",
+                  "type": "Key"
+                },
+                {
+                  "name": "length",
+                  "type": "Func"
+                }
+              ],
+              "type": "NaryOp"
+            }
+          }
+        ],
+        "type": "NaryOp"
+      },
+      "type": "Bind",
+      "value": {
+        "type": "Iterator"
+      }
+    }
+  ],
+  "type": "NaryOp"
+}

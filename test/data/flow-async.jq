@@ -1,7 +1,15 @@
-def publishContent: .;
-def publishPage: {result:.};
+module {descr: "aloha"};
 
-.classes.Philosopher | [3,5,7] | {
+import "ciccio" as cicius {info: "cicciomede"};
+import "bimbo" as $birimbo {main: "bubolo", rumba: 4, quattro: false, furbo: { piu: 1, meno: 1, ops: null, ah: [4]}};
+include "included" {isIncluded: true};
+
+def publishContent: .;
+def publishPage: {result:[.,.[],.|.|.], ciccio: [empty, empty, empty]};
+
+.classes.Philosopher? | .[35] | .[35:] | ((4 + 5) * 6) + 5 | [4, empty, 5 +6] | .a |= . + 42 | true | false | .who[3,5,7].pippo | .[] | (.rido // .piango // .serie[3]) |
+.[] as {$a, $b, c: {$d, $e}} ?// {$a, $b, c: [{$d, $e}]} ?// {$a, $b, c: [[{$d, $e}]]} | {$a, $b, $d, $e} | (.ciccio | length) as $pasticcio |
+{
     title: "A list of ancient philosophers",
     contentURIs: 
         [
@@ -9,6 +17,8 @@ def publishPage: {result:.};
             {
                 id: .id,
                 name: "\(.firstName) \(.familyName)",
+                duo: "pippo" | @base64,
+                trio: @uri "pluto",
                 students: [
                     .hasStudent[] | .id
                 ],
@@ -17,4 +27,4 @@ def publishPage: {result:.};
                 ]
             } | publishContent | @url "https://example.org/\(.reference)"
         ]
-} | publishPage | .result
+} | publishPage | .result | -6
