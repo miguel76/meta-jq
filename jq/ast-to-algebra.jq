@@ -155,7 +155,7 @@ def ast_to_algebra:
                         if .else then .else |= _f end
                 elif $type == "Reduce" then
                     .reduce |
-                        (.term |= _f) |
+                        (.query |= _f) |
                         (.start |= _f) |
                         (.update |= _f)
                 elif $type == "Foreach" then
@@ -165,6 +165,9 @@ def ast_to_algebra:
                         (.update |= _f)
                 elif $type == "Query" then
                     .query | _f
+                elif $type == "Label" then
+                    .label |
+                    (.body |= _f)
                 elif $type == "Try" then
                     .try |
                         (.body |= _f) |

@@ -3,12 +3,62 @@ import "traverse" as t;
 def algebra_tostring($space):
 
     # https://github.com/jqlang/jq/wiki/jq-Language-Description#operators-priority
+    # TODO: check https://github.com/jqlang/jq/issues/2425#issue-1199153017
+
+# Operator	Description
+
+# x?	Error Suppression
+# -x	Negative
+# *, /, %	Multiplication, Division, Modulo
+# +, -	Addition, Subtraction
+# ==, !=, <, >,<=, >=	Comparisons
+# and	Boolean AND
+# or	Boolean OR
+# =, |=, +=, -=, *=, /=, %=	Update-assignment
+# //	Alternative
+# ,	Comma
+# |	Pipe
+# label $variable	Labels
+# try … catch …	Try expression
+# if … then … end	Conditional expression
+# foreach … as … (…)	Loop expression
+# reduce … as … (…)	Reduce expression
+# … as $variable	Variable definition expression
+# def … ; …	Function expression
+
+[
+    {
+        type: "UnaryOp",
+        op: "-"
+    },
+    {
+        type: "BinaryOp",
+        op: [
+            ["*", "/", "%"],
+            ["+", "-"],
+            ["==", "!=", "<", ">", "<=", ">="],
+            ["and"],
+            ["or"],
+            ["=", "|=", "+=", "-=", "*=", "/=", "%=", "//="],
+            ["//"],
+            [","],
+            ["|"]
+        ]
+    },
+# label $variable	Labels
+    "Try",
+    "If",
+    "Foreach",
+    "Reduce",
+    "Bind"
+] as $expr_types_by_prec |
+
     [
         ["?//"],
         ["?"],
         ["-"],
         ["*", "/", "%"],
-        ["=+", "-"],
+        ["+", "-"],
         ["==", "!=", "<", ">", "<=", ">="],
         ["and"],
         ["or"],
@@ -115,13 +165,15 @@ def algebra_tostring($space):
             elif .type == "NaryOp" then .op as $op | .operands | join("\(sep)\($op)\(sep)")
             elif .type == "Index" then ".[\(.index)]"
             elif .type == "Key" then 
+                .optional as $optional |
                 if .name then
                     ".\(.name)"
                 elif .query then
                     ".[\(.query)]"
                 else
                     error("Unsupported type of Key: \(.)")
-                end
+                end |
+                if $optional then "\(.)?" end
             elif .type == "Slice" then ".[\(.start // ""):\(.end // "")]"
             elif .type == "Func" then "\(.name)\(
                 if .args then
@@ -144,13 +196,17 @@ def algebra_tostring($space):
                     if .else then "\(new_line)else \(.else) " else "" end
                 )\(new_line)end"
             elif .type == "Reduce" then
-                "reduce \({term: .term}) as \(.pattern) (\(.start);\(.update))"
+                "reduce \(.query) as \(.pattern) (\(.start);\(.update))"
             elif .type == "Foreach" then
                 "foreach \({term: .term}) as \(.pattern) (\(.start);\(.update)\(
                     if .extract then ";\(.extract)" else "" end
                 ))"
             elif .type == "Try" then
                 "try \(.body)\(if .catch then " catch \(.catch)" else "" end)" 
+            elif .type == "Label" then
+                "label \(.ident) | \(.body)" 
+            elif .type == "Break" then
+                "break \(.break)" 
             elif .type == "Bind" then
                 "\(.value) as \(.patterns | join(", ")) | \(.scope)" 
             else error("unsupported expression: \(.)")

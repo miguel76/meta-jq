@@ -57,8 +57,13 @@ def traverse_expr(visit_expr; visit_pattern; visit_import; visit_func_def):
                 (.then |= _f)
             ] end |
             if .else then .else |= _f end
-        elif .type == "Reduce" or .type == "Foreach" then
+        elif .type == "Foreach" then
             (.term |= _f) |
+            (.pattern |= _pattern) |
+            (.start |= _f) |
+            (.update |= _f)
+        elif .type == "Reduce" then
+            (.query |= _f) |
             (.pattern |= _pattern) |
             (.start |= _f) |
             (.update |= _f)
@@ -69,6 +74,8 @@ def traverse_expr(visit_expr; visit_pattern; visit_import; visit_func_def):
         elif .type == "Try" then
             (.body |= _f) |
             if .catch then .catch |= _f end
+        elif .type == "Label" then
+            (.body |= _f)
         elif .type == "UnaryOp" then
             .operand |= _f
         elif .type == "BinaryOp" then
