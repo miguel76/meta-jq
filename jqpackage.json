@@ -3,9 +3,5 @@
   "version": "1.0.0",
   "description": "Tools for processing jq queries using jq itself (via a JSON representation of jq queries)",
   "main": "meta-jq.jq",
-  "repository": "https://github.com/miguel76/meta-jq.git",
-  "author": "Miguel Ceriani <miguel.ceriani@gmail.com>",
-  "license": "MIT",
-  "private": false,
   "dependencies": {}
 }

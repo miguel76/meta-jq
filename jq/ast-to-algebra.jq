@@ -98,11 +98,11 @@ def ast_to_algebra:
 
         (.meta | if . then meta_to_json end) as $module_meta | 
         (.imports | if . then [.[] | .meta |= meta_to_json] end) as $imports |
-        if .func_defs then
+        (if .func_defs then
             .func_defs | [.[] | .body |= _f]
         else
             null
-        end as $func_defs |
+        end) as $func_defs |
         if .term.type then
             .term | (
                 .type[8:] as $type |
@@ -180,7 +180,7 @@ def ast_to_algebra:
                     {
                         type: "NaryOp",
                         op: "|",
-                        operands: reduce(
+                        operands: (reduce (
                             $suffix_list.[] |
                             if .index then .index | _index
                             elif .bind then empty
@@ -191,7 +191,7 @@ def ast_to_algebra:
                             elif $suffix.optional then .[-1] |= (.optional = true)
                             else [.[], $suffix]
                             end
-                        ) | del(.[0].suffix_list)
+                        ) | del(.[0].suffix_list))
                     } |
                     if $suffix_list[-1].bind then
                         {

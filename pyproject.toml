@@ -1,3 +1,18 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "meta-jq"
 version = "1.0.0"
+description = "Tools for processing jq queries using jq itself (via a JSON representation of jq queries)"
+license = { text = "MIT" }
+
+[tool.setuptools]
+packages = []
+
+# The jq module is installed under <prefix>/lib/jq/meta-jq, to be used with
+# `jq -L <prefix>/lib/jq 'import "meta-jq" as meta; ...'`
+[tool.setuptools.data-files]
+"lib/jq/meta-jq" = ["meta-jq.jq"]
+"lib/jq/meta-jq/jq" = ["jq/*.jq"]
