@@ -17,20 +17,23 @@ It thus possible to manipulate the structure of scripts (which in the case of jq
 If we are able to represent jq queries as JSON, jq queries can be used to manipulate other jq queries, avoiding dependencies from other tool/languages.
 There is currently no established convention on how to represent jq queries as JSON. But the jq implementation [gojq](https://github.com/itchyny/gojq) offers a JSON based representation of the abstract syntax tree (AST) that can be considered as starting point. [jqjq](https://github.com/wader/jqjq) is a jq implementation based on jq itself that outputs the same AST representation (with a few exceptions). 
 
+This representation has some quirks that complicate direct manipulation.
+We propose a represention that we call __jq algebra__ and it is meant to expose jq structure with a more direct mapping of semantics.
+
 ## Install
 
-### Parser for jq: fq
+### From textual jq to AST: fq
 
-A jq query can be parsed and transformed to JSON with jqjq or tools based on gojq.
+A jq query can be parsed and transformed to JSON AST with jqjq or tools based on gojq.
 I suggest installing fq, as described [here](https://github.com/wader/fq#install).
-
-### Manipulation and Serialization
-
-This repository offers tools for manipulating and serializing the JSON obtained by parsing jq queries.
 
 #### Simple setup
 
 Clone/download ths repo and copy/paste the files under the jq directory in some place where the jq engine can find them: e.g., relative path `../lib/meta-jq/` or `../lib/jq/meta-jq/`.
+
+#### jqpm (work in progress)
+
+TODO: add details
 
 #### yarn (experimental)
 
@@ -52,37 +55,45 @@ pip install git+https://github.com/miguel76/meta-jq.git
 
 ## Usage
 
-### jq to JSON
+### Standard jq 
 
-Call the parser:
+Convert with an external tool (fq or jqjq) from textual jq to AST JSON:
 
 ```shell
 fq --raw-input --slurp '_query_fromstring' <paht/to/query/file.jq >path/to/output.json
 ```
 
-## Manipulating jq as JSON
+Manipulate query and serialize it back as text:
 
 ```jq
 import "meta-jq" as meta;
 
-...
+# AST => algebra
+meta::ast_to_algebra |
 
-meta::traverse_ast(visit_expr; visit_pattern; visit_index; visit_suffix; visit_func_def);
+# manipulate query (with visitor filters)
+meta::traverse_expr(visit_expr; visit_pattern; visit_import; visit_func_def) |
+
+# algebra => textual jq
+algebra_tostring
 ```
 
-Where `visit_expr`, `visit_pattern`, `visit_index`, `visit_suffix`, and `visit_func_def` are functions that perform some operation on the corresponding nodes of the AST.
+### With fq or jqjq
 
-## JSON to jq
+Everything in jq, as `_query_fromstring` is available:
 
 ```jq
 import "meta-jq" as meta;
 
-...
+# textual jq => AST
+_query_fromstring | 
 
-meta::ast_tostring($space)
+# AST => algebra
+meta::ast_to_algebra |
+
+# manipulate query (with visitor filters)
+meta::traverse_expr(visit_expr; visit_pattern; visit_import; visit_func_def) |
+
+# algebra => textual jq
+algebra_tostring
 ```
-
-Where `$space` is an optional parameter to pretty print the output jq query:
-- if omitted or `null`, the function does not attempt to pretty print the output;
-- if it is a string, it is used as "tab unit" for indentation;
-- if it is a number, the tab unit is composed by that number of spaces.

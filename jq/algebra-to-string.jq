@@ -1,5 +1,11 @@
 import "traverse" as t;
 
+# String serialization of a jq algebra expression
+# - `$space`, optional parameter to pretty print the output jq query:
+#    - if omitted or `null`, the function does not attempt to pretty print the output;
+#    - if it is a string, it is used as "tab unit" for indentation;
+#    - if it is a number, the tab unit is composed by that number of spaces.
+
 def algebra_tostring($space):
 
     # https://github.com/jqlang/jq/wiki/jq-Language-Description#operators-priority
