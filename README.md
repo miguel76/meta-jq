@@ -54,8 +54,8 @@ The module is installed under `jq_modules/miguel76/meta-jq` and can be used as f
 
 ```shell
 jq -L jq_modules 'import "miguel76/meta-jq" as meta; meta::ast_to_algebra' <path/to/ast.json
-# or, with jq_modules already on the search path
-jqpm run 'import "miguel76/meta-jq" as meta; meta::ast_to_algebra' <path/to/ast.json
+# or, with jq_modules already on the search path (jq options go after `--`)
+jqpm run -- -r 'import "miguel76/meta-jq" as meta; meta::ast_to_algebra | meta::algebra_tostring' <path/to/ast.json
 ```
 
 ### yarn (experimental)

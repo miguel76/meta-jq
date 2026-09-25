@@ -12,6 +12,10 @@
 
 set -u
 
+if [ -n "${META_JQ_LIB:-}" ]; then
+    META_JQ_LIB="$(cd "$META_JQ_LIB" && pwd)" || exit 1
+fi
+
 cd "$(dirname "$0")"
 DATA="$PWD/data"
 
@@ -21,7 +25,6 @@ if [ -z "${META_JQ_LIB:-}" ]; then
     ln -s "$(cd .. && pwd)" "$META_JQ_LIB/meta-jq"
     META_JQ_MODULE="meta-jq"
 fi
-META_JQ_LIB="$(cd "$META_JQ_LIB" && pwd)"
 META_JQ_MODULE="${META_JQ_MODULE:-meta-jq}"
 
 if [ $# -eq 0 ]; then
