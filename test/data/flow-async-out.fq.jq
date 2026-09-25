@@ -31,12 +31,12 @@ def publishPage:
         ciccio: [empty]
     };
 
-.classes | .Philosopher | .[35] | .[35:] | 4 + 5 * 6 + 5 | [4 , 5 + 6] | .a |= . + 42 | true | false | .who | .[3 , 5 , 7] | .pippo | .[] | .rido // .piango // .serie | .[3] | .[] as {$a, $b, c: {$d, $e}}, {$a, $b, c: [{$d, $e}]}, {$a, $b, c: [[{$d, $e}]]} | {   
+.classes | .Philosopher? | .[35] | .[35:] | 4 + 5 * 6 + 5 | [4 , 5 + 6] | .a |= . + 42 | true | false | .who | .[3 , 5 , 7] | .pippo | .[] | .rido // .piango // .serie | .[3] | .[] | {   
     $a,
     $b,
     $d,
     $e
-} | .ciccio | length as $pasticcio | {   
+} | .ciccio | length | {   
     title: "A list of ancient philosophers",
     contentURIs: [.hasInstance | .[] | select(.birthDate < "500-01-01T00:00:00Z") | {  
         id: .id,

@@ -504,426 +504,83 @@
                       },
                       "op": "|",
                       "right": {
-                        "term": {
-                          "suffix_list": [
-                            {
-                              "iter": true
-                            },
-                            {
-                              "bind": {
-                                "body": {
-                                  "left": {
-                                    "term": {
-                                      "object": {
-                                        "key_vals": [
-                                          {
-                                            "key": "$a"
-                                          },
-                                          {
-                                            "key": "$b"
-                                          },
-                                          {
-                                            "key": "$d"
-                                          },
-                                          {
-                                            "key": "$e"
-                                          }
-                                        ]
-                                      },
-                                      "type": "TermTypeObject"
+                        "left": {
+                          "term": {
+                            "suffix_list": [
+                              {
+                                "iter": true
+                              }
+                            ],
+                            "type": "TermTypeIdentity"
+                          }
+                        },
+                        "op": "|",
+                        "patterns": [
+                          {
+                            "object": [
+                              {
+                                "key": "$a"
+                              },
+                              {
+                                "key": "$b"
+                              },
+                              {
+                                "key": "c",
+                                "val": {
+                                  "object": [
+                                    {
+                                      "key": "$d"
+                                    },
+                                    {
+                                      "key": "$e"
                                     }
-                                  },
-                                  "op": "|",
-                                  "right": {
-                                    "term": {
-                                      "query": {
-                                        "left": {
-                                          "term": {
-                                            "index": {
-                                              "name": "ciccio"
-                                            },
-                                            "type": "TermTypeIndex"
-                                          }
-                                        },
-                                        "op": "|",
-                                        "right": {
-                                          "term": {
-                                            "func": {
-                                              "name": "length"
-                                            },
-                                            "type": "TermTypeFunc"
-                                          }
-                                        }
-                                      },
-                                      "suffix_list": [
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "object": [
+                              {
+                                "key": "$a"
+                              },
+                              {
+                                "key": "$b"
+                              },
+                              {
+                                "key": "c",
+                                "val": {
+                                  "array": [
+                                    {
+                                      "object": [
                                         {
-                                          "bind": {
-                                            "body": {
-                                              "left": {
-                                                "term": {
-                                                  "object": {
-                                                    "key_vals": [
-                                                      {
-                                                        "key": "title",
-                                                        "val": {
-                                                          "term": {
-                                                            "str": {
-                                                              "str": "A list of ancient philosophers"
-                                                            },
-                                                            "type": "TermTypeString"
-                                                          }
-                                                        }
-                                                      },
-                                                      {
-                                                        "key": "contentURIs",
-                                                        "val": {
-                                                          "term": {
-                                                            "array": {
-                                                              "query": {
-                                                                "left": {
-                                                                  "term": {
-                                                                    "index": {
-                                                                      "name": "hasInstance"
-                                                                    },
-                                                                    "suffix_list": [
-                                                                      {
-                                                                        "iter": true
-                                                                      }
-                                                                    ],
-                                                                    "type": "TermTypeIndex"
-                                                                  }
-                                                                },
-                                                                "op": "|",
-                                                                "right": {
-                                                                  "left": {
-                                                                    "term": {
-                                                                      "func": {
-                                                                        "args": [
-                                                                          {
-                                                                            "left": {
-                                                                              "term": {
-                                                                                "index": {
-                                                                                  "name": "birthDate"
-                                                                                },
-                                                                                "type": "TermTypeIndex"
-                                                                              }
-                                                                            },
-                                                                            "op": "<",
-                                                                            "right": {
-                                                                              "term": {
-                                                                                "str": {
-                                                                                  "str": "500-01-01T00:00:00Z"
-                                                                                },
-                                                                                "type": "TermTypeString"
-                                                                              }
-                                                                            }
-                                                                          }
-                                                                        ],
-                                                                        "name": "select"
-                                                                      },
-                                                                      "type": "TermTypeFunc"
-                                                                    }
-                                                                  },
-                                                                  "op": "|",
-                                                                  "right": {
-                                                                    "left": {
-                                                                      "term": {
-                                                                        "object": {
-                                                                          "key_vals": [
-                                                                            {
-                                                                              "key": "id",
-                                                                              "val": {
-                                                                                "term": {
-                                                                                  "index": {
-                                                                                    "name": "id"
-                                                                                  },
-                                                                                  "type": "TermTypeIndex"
-                                                                                }
-                                                                              }
-                                                                            },
-                                                                            {
-                                                                              "key": "name",
-                                                                              "val": {
-                                                                                "term": {
-                                                                                  "str": {
-                                                                                    "queries": [
-                                                                                      {
-                                                                                        "term": {
-                                                                                          "query": {
-                                                                                            "term": {
-                                                                                              "index": {
-                                                                                                "name": "firstName"
-                                                                                              },
-                                                                                              "type": "TermTypeIndex"
-                                                                                            }
-                                                                                          },
-                                                                                          "type": "TermTypeQuery"
-                                                                                        }
-                                                                                      },
-                                                                                      {
-                                                                                        "term": {
-                                                                                          "str": {
-                                                                                            "str": " "
-                                                                                          },
-                                                                                          "type": "TermTypeString"
-                                                                                        }
-                                                                                      },
-                                                                                      {
-                                                                                        "term": {
-                                                                                          "query": {
-                                                                                            "term": {
-                                                                                              "index": {
-                                                                                                "name": "familyName"
-                                                                                              },
-                                                                                              "type": "TermTypeIndex"
-                                                                                            }
-                                                                                          },
-                                                                                          "type": "TermTypeQuery"
-                                                                                        }
-                                                                                      }
-                                                                                    ]
-                                                                                  },
-                                                                                  "type": "TermTypeString"
-                                                                                }
-                                                                              }
-                                                                            },
-                                                                            {
-                                                                              "key": "duo",
-                                                                              "val": {
-                                                                                "left": {
-                                                                                  "term": {
-                                                                                    "str": {
-                                                                                      "str": "pippo"
-                                                                                    },
-                                                                                    "type": "TermTypeString"
-                                                                                  }
-                                                                                },
-                                                                                "op": "|",
-                                                                                "right": {
-                                                                                  "term": {
-                                                                                    "format": "@base64",
-                                                                                    "type": "TermTypeFormat"
-                                                                                  }
-                                                                                }
-                                                                              }
-                                                                            },
-                                                                            {
-                                                                              "key": "trio",
-                                                                              "val": {
-                                                                                "term": {
-                                                                                  "format": "@uri",
-                                                                                  "str": {
-                                                                                    "str": "pluto"
-                                                                                  },
-                                                                                  "type": "TermTypeFormat"
-                                                                                }
-                                                                              }
-                                                                            },
-                                                                            {
-                                                                              "key": "students",
-                                                                              "val": {
-                                                                                "term": {
-                                                                                  "array": {
-                                                                                    "query": {
-                                                                                      "left": {
-                                                                                        "term": {
-                                                                                          "index": {
-                                                                                            "name": "hasStudent"
-                                                                                          },
-                                                                                          "suffix_list": [
-                                                                                            {
-                                                                                              "iter": true
-                                                                                            }
-                                                                                          ],
-                                                                                          "type": "TermTypeIndex"
-                                                                                        }
-                                                                                      },
-                                                                                      "op": "|",
-                                                                                      "right": {
-                                                                                        "term": {
-                                                                                          "index": {
-                                                                                            "name": "id"
-                                                                                          },
-                                                                                          "type": "TermTypeIndex"
-                                                                                        }
-                                                                                      }
-                                                                                    }
-                                                                                  },
-                                                                                  "type": "TermTypeArray"
-                                                                                }
-                                                                              }
-                                                                            },
-                                                                            {
-                                                                              "key": "studentsOfStudents",
-                                                                              "val": {
-                                                                                "term": {
-                                                                                  "array": {
-                                                                                    "query": {
-                                                                                      "left": {
-                                                                                        "term": {
-                                                                                          "index": {
-                                                                                            "name": "hasStudent"
-                                                                                          },
-                                                                                          "suffix_list": [
-                                                                                            {
-                                                                                              "iter": true
-                                                                                            }
-                                                                                          ],
-                                                                                          "type": "TermTypeIndex"
-                                                                                        }
-                                                                                      },
-                                                                                      "op": "|",
-                                                                                      "right": {
-                                                                                        "left": {
-                                                                                          "term": {
-                                                                                            "index": {
-                                                                                              "name": "hasStudent"
-                                                                                            },
-                                                                                            "suffix_list": [
-                                                                                              {
-                                                                                                "iter": true
-                                                                                              }
-                                                                                            ],
-                                                                                            "type": "TermTypeIndex"
-                                                                                          }
-                                                                                        },
-                                                                                        "op": "|",
-                                                                                        "right": {
-                                                                                          "term": {
-                                                                                            "index": {
-                                                                                              "name": "id"
-                                                                                            },
-                                                                                            "type": "TermTypeIndex"
-                                                                                          }
-                                                                                        }
-                                                                                      }
-                                                                                    }
-                                                                                  },
-                                                                                  "type": "TermTypeArray"
-                                                                                }
-                                                                              }
-                                                                            }
-                                                                          ]
-                                                                        },
-                                                                        "type": "TermTypeObject"
-                                                                      }
-                                                                    },
-                                                                    "op": "|",
-                                                                    "right": {
-                                                                      "left": {
-                                                                        "term": {
-                                                                          "func": {
-                                                                            "name": "publishContent"
-                                                                          },
-                                                                          "type": "TermTypeFunc"
-                                                                        }
-                                                                      },
-                                                                      "op": "|",
-                                                                      "right": {
-                                                                        "term": {
-                                                                          "format": "@url",
-                                                                          "str": {
-                                                                            "queries": [
-                                                                              {
-                                                                                "term": {
-                                                                                  "str": {
-                                                                                    "str": "https://example.org/"
-                                                                                  },
-                                                                                  "type": "TermTypeString"
-                                                                                }
-                                                                              },
-                                                                              {
-                                                                                "term": {
-                                                                                  "query": {
-                                                                                    "term": {
-                                                                                      "index": {
-                                                                                        "name": "reference"
-                                                                                      },
-                                                                                      "type": "TermTypeIndex"
-                                                                                    }
-                                                                                  },
-                                                                                  "type": "TermTypeQuery"
-                                                                                }
-                                                                              }
-                                                                            ]
-                                                                          },
-                                                                          "type": "TermTypeFormat"
-                                                                        }
-                                                                      }
-                                                                    }
-                                                                  }
-                                                                }
-                                                              }
-                                                            },
-                                                            "type": "TermTypeArray"
-                                                          }
-                                                        }
-                                                      }
-                                                    ]
-                                                  },
-                                                  "type": "TermTypeObject"
-                                                }
-                                              },
-                                              "op": "|",
-                                              "right": {
-                                                "left": {
-                                                  "term": {
-                                                    "func": {
-                                                      "name": "publishPage"
-                                                    },
-                                                    "type": "TermTypeFunc"
-                                                  }
-                                                },
-                                                "op": "|",
-                                                "right": {
-                                                  "left": {
-                                                    "term": {
-                                                      "index": {
-                                                        "name": "result"
-                                                      },
-                                                      "type": "TermTypeIndex"
-                                                    }
-                                                  },
-                                                  "op": "|",
-                                                  "right": {
-                                                    "term": {
-                                                      "type": "TermTypeUnary",
-                                                      "unary": {
-                                                        "op": "-",
-                                                        "term": {
-                                                          "number": "6",
-                                                          "type": "TermTypeNumber"
-                                                        }
-                                                      }
-                                                    }
-                                                  }
-                                                }
-                                              }
-                                            },
-                                            "patterns": [
-                                              {
-                                                "name": "$pasticcio"
-                                              }
-                                            ]
-                                          }
+                                          "key": "$d"
+                                        },
+                                        {
+                                          "key": "$e"
                                         }
-                                      ],
-                                      "type": "TermTypeQuery"
+                                      ]
                                     }
-                                  }
-                                },
-                                "patterns": [
-                                  {
-                                    "object": [
-                                      {
-                                        "key": "$a"
-                                      },
-                                      {
-                                        "key": "$b"
-                                      },
-                                      {
-                                        "key": "c",
-                                        "val": {
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "object": [
+                              {
+                                "key": "$a"
+                              },
+                              {
+                                "key": "$b"
+                              },
+                              {
+                                "key": "c",
+                                "val": {
+                                  "array": [
+                                    {
+                                      "array": [
+                                        {
                                           "object": [
                                             {
                                               "key": "$d"
@@ -933,72 +590,411 @@
                                             }
                                           ]
                                         }
-                                      }
-                                    ]
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        ],
+                        "right": {
+                          "left": {
+                            "term": {
+                              "object": {
+                                "key_vals": [
+                                  {
+                                    "key": "$a"
                                   },
                                   {
-                                    "object": [
-                                      {
-                                        "key": "$a"
-                                      },
-                                      {
-                                        "key": "$b"
-                                      },
-                                      {
-                                        "key": "c",
-                                        "val": {
-                                          "array": [
-                                            {
-                                              "object": [
-                                                {
-                                                  "key": "$d"
-                                                },
-                                                {
-                                                  "key": "$e"
-                                                }
-                                              ]
-                                            }
-                                          ]
-                                        }
-                                      }
-                                    ]
+                                    "key": "$b"
                                   },
                                   {
-                                    "object": [
-                                      {
-                                        "key": "$a"
-                                      },
-                                      {
-                                        "key": "$b"
-                                      },
-                                      {
-                                        "key": "c",
-                                        "val": {
-                                          "array": [
-                                            {
-                                              "array": [
-                                                {
-                                                  "object": [
-                                                    {
-                                                      "key": "$d"
-                                                    },
-                                                    {
-                                                      "key": "$e"
-                                                    }
-                                                  ]
-                                                }
-                                              ]
-                                            }
-                                          ]
-                                        }
-                                      }
-                                    ]
+                                    "key": "$d"
+                                  },
+                                  {
+                                    "key": "$e"
                                   }
                                 ]
+                              },
+                              "type": "TermTypeObject"
+                            }
+                          },
+                          "op": "|",
+                          "right": {
+                            "left": {
+                              "term": {
+                                "query": {
+                                  "left": {
+                                    "term": {
+                                      "index": {
+                                        "name": "ciccio"
+                                      },
+                                      "type": "TermTypeIndex"
+                                    }
+                                  },
+                                  "op": "|",
+                                  "right": {
+                                    "term": {
+                                      "func": {
+                                        "name": "length"
+                                      },
+                                      "type": "TermTypeFunc"
+                                    }
+                                  }
+                                },
+                                "type": "TermTypeQuery"
+                              }
+                            },
+                            "op": "|",
+                            "patterns": [
+                              {
+                                "name": "$pasticcio"
+                              }
+                            ],
+                            "right": {
+                              "left": {
+                                "term": {
+                                  "object": {
+                                    "key_vals": [
+                                      {
+                                        "key": "title",
+                                        "val": {
+                                          "term": {
+                                            "str": {
+                                              "str": "A list of ancient philosophers"
+                                            },
+                                            "type": "TermTypeString"
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "key": "contentURIs",
+                                        "val": {
+                                          "term": {
+                                            "array": {
+                                              "query": {
+                                                "left": {
+                                                  "term": {
+                                                    "index": {
+                                                      "name": "hasInstance"
+                                                    },
+                                                    "suffix_list": [
+                                                      {
+                                                        "iter": true
+                                                      }
+                                                    ],
+                                                    "type": "TermTypeIndex"
+                                                  }
+                                                },
+                                                "op": "|",
+                                                "right": {
+                                                  "left": {
+                                                    "term": {
+                                                      "func": {
+                                                        "args": [
+                                                          {
+                                                            "left": {
+                                                              "term": {
+                                                                "index": {
+                                                                  "name": "birthDate"
+                                                                },
+                                                                "type": "TermTypeIndex"
+                                                              }
+                                                            },
+                                                            "op": "<",
+                                                            "right": {
+                                                              "term": {
+                                                                "str": {
+                                                                  "str": "500-01-01T00:00:00Z"
+                                                                },
+                                                                "type": "TermTypeString"
+                                                              }
+                                                            }
+                                                          }
+                                                        ],
+                                                        "name": "select"
+                                                      },
+                                                      "type": "TermTypeFunc"
+                                                    }
+                                                  },
+                                                  "op": "|",
+                                                  "right": {
+                                                    "left": {
+                                                      "term": {
+                                                        "object": {
+                                                          "key_vals": [
+                                                            {
+                                                              "key": "id",
+                                                              "val": {
+                                                                "term": {
+                                                                  "index": {
+                                                                    "name": "id"
+                                                                  },
+                                                                  "type": "TermTypeIndex"
+                                                                }
+                                                              }
+                                                            },
+                                                            {
+                                                              "key": "name",
+                                                              "val": {
+                                                                "term": {
+                                                                  "str": {
+                                                                    "queries": [
+                                                                      {
+                                                                        "term": {
+                                                                          "query": {
+                                                                            "term": {
+                                                                              "index": {
+                                                                                "name": "firstName"
+                                                                              },
+                                                                              "type": "TermTypeIndex"
+                                                                            }
+                                                                          },
+                                                                          "type": "TermTypeQuery"
+                                                                        }
+                                                                      },
+                                                                      {
+                                                                        "term": {
+                                                                          "str": {
+                                                                            "str": " "
+                                                                          },
+                                                                          "type": "TermTypeString"
+                                                                        }
+                                                                      },
+                                                                      {
+                                                                        "term": {
+                                                                          "query": {
+                                                                            "term": {
+                                                                              "index": {
+                                                                                "name": "familyName"
+                                                                              },
+                                                                              "type": "TermTypeIndex"
+                                                                            }
+                                                                          },
+                                                                          "type": "TermTypeQuery"
+                                                                        }
+                                                                      }
+                                                                    ]
+                                                                  },
+                                                                  "type": "TermTypeString"
+                                                                }
+                                                              }
+                                                            },
+                                                            {
+                                                              "key": "duo",
+                                                              "val": {
+                                                                "left": {
+                                                                  "term": {
+                                                                    "str": {
+                                                                      "str": "pippo"
+                                                                    },
+                                                                    "type": "TermTypeString"
+                                                                  }
+                                                                },
+                                                                "op": "|",
+                                                                "right": {
+                                                                  "term": {
+                                                                    "format": "@base64",
+                                                                    "type": "TermTypeFormat"
+                                                                  }
+                                                                }
+                                                              }
+                                                            },
+                                                            {
+                                                              "key": "trio",
+                                                              "val": {
+                                                                "term": {
+                                                                  "format": "@uri",
+                                                                  "str": {
+                                                                    "str": "pluto"
+                                                                  },
+                                                                  "type": "TermTypeFormat"
+                                                                }
+                                                              }
+                                                            },
+                                                            {
+                                                              "key": "students",
+                                                              "val": {
+                                                                "term": {
+                                                                  "array": {
+                                                                    "query": {
+                                                                      "left": {
+                                                                        "term": {
+                                                                          "index": {
+                                                                            "name": "hasStudent"
+                                                                          },
+                                                                          "suffix_list": [
+                                                                            {
+                                                                              "iter": true
+                                                                            }
+                                                                          ],
+                                                                          "type": "TermTypeIndex"
+                                                                        }
+                                                                      },
+                                                                      "op": "|",
+                                                                      "right": {
+                                                                        "term": {
+                                                                          "index": {
+                                                                            "name": "id"
+                                                                          },
+                                                                          "type": "TermTypeIndex"
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  },
+                                                                  "type": "TermTypeArray"
+                                                                }
+                                                              }
+                                                            },
+                                                            {
+                                                              "key": "studentsOfStudents",
+                                                              "val": {
+                                                                "term": {
+                                                                  "array": {
+                                                                    "query": {
+                                                                      "left": {
+                                                                        "term": {
+                                                                          "index": {
+                                                                            "name": "hasStudent"
+                                                                          },
+                                                                          "suffix_list": [
+                                                                            {
+                                                                              "iter": true
+                                                                            }
+                                                                          ],
+                                                                          "type": "TermTypeIndex"
+                                                                        }
+                                                                      },
+                                                                      "op": "|",
+                                                                      "right": {
+                                                                        "left": {
+                                                                          "term": {
+                                                                            "index": {
+                                                                              "name": "hasStudent"
+                                                                            },
+                                                                            "suffix_list": [
+                                                                              {
+                                                                                "iter": true
+                                                                              }
+                                                                            ],
+                                                                            "type": "TermTypeIndex"
+                                                                          }
+                                                                        },
+                                                                        "op": "|",
+                                                                        "right": {
+                                                                          "term": {
+                                                                            "index": {
+                                                                              "name": "id"
+                                                                            },
+                                                                            "type": "TermTypeIndex"
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  },
+                                                                  "type": "TermTypeArray"
+                                                                }
+                                                              }
+                                                            }
+                                                          ]
+                                                        },
+                                                        "type": "TermTypeObject"
+                                                      }
+                                                    },
+                                                    "op": "|",
+                                                    "right": {
+                                                      "left": {
+                                                        "term": {
+                                                          "func": {
+                                                            "name": "publishContent"
+                                                          },
+                                                          "type": "TermTypeFunc"
+                                                        }
+                                                      },
+                                                      "op": "|",
+                                                      "right": {
+                                                        "term": {
+                                                          "format": "@url",
+                                                          "str": {
+                                                            "queries": [
+                                                              {
+                                                                "term": {
+                                                                  "str": {
+                                                                    "str": "https://example.org/"
+                                                                  },
+                                                                  "type": "TermTypeString"
+                                                                }
+                                                              },
+                                                              {
+                                                                "term": {
+                                                                  "query": {
+                                                                    "term": {
+                                                                      "index": {
+                                                                        "name": "reference"
+                                                                      },
+                                                                      "type": "TermTypeIndex"
+                                                                    }
+                                                                  },
+                                                                  "type": "TermTypeQuery"
+                                                                }
+                                                              }
+                                                            ]
+                                                          },
+                                                          "type": "TermTypeFormat"
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "type": "TermTypeArray"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "type": "TermTypeObject"
+                                }
+                              },
+                              "op": "|",
+                              "right": {
+                                "left": {
+                                  "term": {
+                                    "func": {
+                                      "name": "publishPage"
+                                    },
+                                    "type": "TermTypeFunc"
+                                  }
+                                },
+                                "op": "|",
+                                "right": {
+                                  "left": {
+                                    "term": {
+                                      "index": {
+                                        "name": "result"
+                                      },
+                                      "type": "TermTypeIndex"
+                                    }
+                                  },
+                                  "op": "|",
+                                  "right": {
+                                    "term": {
+                                      "type": "TermTypeUnary",
+                                      "unary": {
+                                        "op": "-",
+                                        "term": {
+                                          "number": "6",
+                                          "type": "TermTypeNumber"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
                               }
                             }
-                          ],
-                          "type": "TermTypeIdentity"
+                          }
                         }
                       }
                     }
