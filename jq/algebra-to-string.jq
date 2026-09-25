@@ -1,4 +1,4 @@
-import "traverse" as t;
+import "traverse" as t {search: "./"};
 
 # String serialization of a jq algebra expression
 # - `$space`, optional parameter to pretty print the output jq query:
@@ -147,11 +147,11 @@ def algebra_tostring($space):
         )}";
 
     def serialize_expr:
-        if .meta then
+        (if .meta then
             "module \(.meta | serialize_json);\(new_line)\(new_line)"
         else 
             ""
-        end as $module_decl |
+        end) as $module_decl |
         "\(
             [$module_decl, .imports[]?, .func_defs[]?] | join("")
         )\(
