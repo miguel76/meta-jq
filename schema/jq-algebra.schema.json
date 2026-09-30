@@ -2,9 +2,36 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://github.com/miguel76/meta-jq/schema/jq-algebra.schema.json",
     "title": "jq algebra",
-    "description": "JSON representation of a jq query (a 'program' or 'module'), as produced by `meta::ast_to_algebra` and consumed by `meta::traverse_expr` and `meta::algebra_tostring`. The root of a document is an expression; the module header (`meta`, `imports`) is only meaningful on the root, while `func_defs` may appear on any expression. See doc/jq-algebra.md for a guide.",
-    "$ref": "#/$defs/Expr",
+    "description": "JSON representation of a jq query (a 'program' or 'module'), as produced by `meta::ast_to_algebra` and consumed by `meta::traverse_expr` and `meta::algebra_tostring`. The root of a document is an expression, or a library module with no main expression; the module header (`meta`, `imports`) is only meaningful on the root, while `func_defs` may appear on any expression. See doc/jq-algebra.md for a guide.",
+    "oneOf": [
+        {"$ref": "#/$defs/Expr"},
+        {"$ref": "#/$defs/Module"}
+    ],
     "$defs": {
+        "Module": {
+            "title": "Library module",
+            "description": "A module with no main expression, made only of the module header and function definitions (e.g. `def f: 1;`). Root only; it has no `type`.",
+            "type": "object",
+            "properties": {
+                "meta": {"$ref": "#/$defs/Metadata"},
+                "imports": {
+                    "type": "array",
+                    "items": {"$ref": "#/$defs/Import"},
+                    "minItems": 1
+                },
+                "func_defs": {
+                    "type": "array",
+                    "items": {"$ref": "#/$defs/FuncDef"},
+                    "minItems": 1
+                }
+            },
+            "anyOf": [
+                {"required": ["meta"]},
+                {"required": ["imports"]},
+                {"required": ["func_defs"]}
+            ],
+            "additionalProperties": false
+        },
         "Expr": {
             "title": "Expression",
             "description": "A jq expression (filter). The kind of expression is given by `type`.",
@@ -14,7 +41,7 @@
                 "type": {
                     "enum": [
                         "Identity", "Recurse", "Iterator",
-                        "Null", "Literal", "StringInterpolation", "Format",
+                        "Literal", "StringInterpolation", "Format",
                         "Key", "Index", "Slice",
                         "Func", "Object", "Array",
                         "UnaryOp", "BinaryOp", "NaryOp",
@@ -44,7 +71,6 @@
                 {"$ref": "#/$defs/Identity"},
                 {"$ref": "#/$defs/Recurse"},
                 {"$ref": "#/$defs/Iterator"},
-                {"$ref": "#/$defs/Null"},
                 {"$ref": "#/$defs/Literal"},
                 {"$ref": "#/$defs/StringInterpolation"},
                 {"$ref": "#/$defs/Format"},
@@ -81,16 +107,12 @@
             "properties": {"type": {"const": "Iterator"}}
         },
 
-        "Null": {
-            "description": "`null`",
-            "properties": {"type": {"const": "Null"}}
-        },
         "Literal": {
-            "description": "A constant number, boolean or string without interpolation (e.g. `42`, `true`, `\"abc\"`).",
+            "description": "A constant: `null`, a number, a boolean or a string without interpolation (e.g. `null`, `42`, `true`, `\"abc\"`).",
             "required": ["value"],
             "properties": {
                 "type": {"const": "Literal"},
-                "value": {"type": ["number", "boolean", "string"]}
+                "value": {"type": ["null", "number", "boolean", "string"]}
             }
         },
         "StringInterpolation": {
@@ -143,17 +165,13 @@
                 },
                 "str": {
                     "description": "The string the format is applied to.",
-                    "$ref": "#/$defs/Expr",
-                    "properties": {
-                        "type": {"enum": ["Literal", "StringInterpolation"]},
-                        "value": {"type": "string"}
-                    }
+                    "$ref": "#/$defs/StringExpr"
                 }
             }
         },
 
         "Key": {
-            "description": "Object key access: `.name` or `.[\"name\"]`-like forms with a string query.",
+            "description": "Object key access: `.name` or `.\"name\"` (`name`), or `.\"a\\(.b)\"` (`query`, a `StringInterpolation`).",
             "oneOf": [
                 {"required": ["name"], "not": {"required": ["query"]}},
                 {"required": ["query"], "not": {"required": ["name"]}}
@@ -161,11 +179,11 @@
             "properties": {
                 "type": {"const": "Key"},
                 "name": {
-                    "description": "Key name, for `.name`.",
+                    "description": "Key name, for `.name` and `.\"name\"` (any string).",
                     "type": "string"
                 },
                 "query": {
-                    "description": "Query computing the key.",
+                    "description": "Query computing the key: the interpolated string of `.\"a\\(.b)\"`.",
                     "$ref": "#/$defs/Expr"
                 }
             }
@@ -235,20 +253,16 @@
             "additionalProperties": false
         },
         "KeyString": {
-            "description": "Quoted key (`{\"a\": ...}`). Only the plain string form `{str}` is converted to algebra: an interpolated key (`{\"a\\(.b)\": ...}`) is currently kept as in the source AST, as `{queries: [...]}`.",
-            "type": "object",
-            "oneOf": [
-                {
-                    "required": ["str"],
-                    "properties": {"str": {"type": "string"}},
-                    "additionalProperties": false
-                },
-                {
-                    "required": ["queries"],
-                    "properties": {"queries": {"type": "array"}},
-                    "additionalProperties": false
-                }
-            ]
+            "description": "Quoted key: `{\"a\": ...}` (a `Literal`) or `{\"a\\(.b)\": ...}` (a `StringInterpolation`).",
+            "$ref": "#/$defs/StringExpr"
+        },
+        "StringExpr": {
+            "description": "A string expression: a `Literal` with a string value or a `StringInterpolation`.",
+            "$ref": "#/$defs/Expr",
+            "properties": {
+                "type": {"enum": ["Literal", "StringInterpolation"]},
+                "value": {"type": "string"}
+            }
         },
         "Array": {
             "description": "Array construction `[query]`; `query` is absent for `[]`.",
@@ -417,7 +431,7 @@
             ]
         },
         "ObjectPatternEntry": {
-            "description": "Entry of an object pattern: `$name` (binds the value of key `name`), `$name: pattern`, `key: pattern`, `\"key\": pattern` or `(query): pattern`. `key_string` and `key_query` are currently kept as in the source AST (not converted to algebra).",
+            "description": "Entry of an object pattern: `$name` (binds the value of key `name`), `$name: pattern`, `key: pattern`, `\"key\": pattern` or `(query): pattern`.",
             "type": "object",
             "properties": {
                 "key": {
@@ -426,8 +440,8 @@
                 },
                 "key_string": {"$ref": "#/$defs/KeyString"},
                 "key_query": {
-                    "description": "Computed key, as in the source AST.",
-                    "type": "object"
+                    "description": "Computed key `(query): pattern`.",
+                    "$ref": "#/$defs/Expr"
                 },
                 "val": {"$ref": "#/$defs/Pattern"}
             },

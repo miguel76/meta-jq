@@ -61,7 +61,14 @@ done <<'EOF'
 {"type": "NaryOp", "op": "+", "operands": [{"type": "Identity"}, {"type": "Identity"}]}
 {"type": "Key", "name": "a", "query": {"type": "Identity"}}
 {"type": "Bind", "value": {"type": "Identity"}, "patterns": [{"name": "x"}], "scope": {"type": "Identity"}}
-{"type": "Literal", "value": null}
+{"type": "Null"}
+{"type": "Literal", "value": [1]}
+{"type": "Object", "key_vals": [{"key_string": {"str": "a"}, "val": {"type": "Identity"}}]}
+{"type": "Object", "key_vals": [{"key_string": {"type": "Identity"}, "val": {"type": "Identity"}}]}
+{"type": "Bind", "value": {"type": "Identity"}, "patterns": [{"object": [{"key_query": {"term": {"type": "TermTypeIdentity"}}, "val": {"name": "$x"}}]}], "scope": {"type": "Identity"}}
+{"type": "Bind", "value": {"type": "Identity"}, "patterns": [{"object": [{"key_string": {"str": "a"}, "val": {"name": "$x"}}]}], "scope": {"type": "Identity"}}
+{"func_defs": []}
+{"func_defs": [{"name": "f", "body": {"type": "Identity"}}], "optional": true}
 EOF
 
 if command -v "$FQ" >/dev/null; then
@@ -79,9 +86,14 @@ if command -v "$FQ" >/dev/null; then
 .[]?
 .a.b[0]
 .a?
+.[1]?
+."a"
+.a."b"
+.a."b\(.c)"
 .[1:]
 .[:2]
 null
+[null, true, false]
 42
 "abc"
 "a\(.x)b"
@@ -93,6 +105,9 @@ f(.; 1)
 []
 [.[] | .id]
 {a, $b, "c": 1, (.d): 2, $x: 3, "e"}
+{"a\(.b)": 1, "y\(.)": 2}
+(1 + 2) * 3
+(.a | .b)? | .c
 .a |= . + 1
 1 // 2 // 3
 1, 2 | 3
@@ -100,11 +115,16 @@ a and b or c
 if . then 1 elif 2 then 3 else 4 end
 try error catch .
 f?
+(1, 2)?
 label $out | 1, break $out
 reduce .[] as [$a, $b] (0; . + $a)
 foreach .[] as $x (0; . + 1; [$x])
 foreach .[] as {a: $x, $y, $w: [$v]} (0; .)
 .[] as [$a] ?// $a | $a
+. as {"a": $x, "b\(.c)": $y, (.k): $z, $w: [$v]} | $x
+reduce .[] as {(.k): $x} (0; . + $x)
+def f: 1;
+module {name: "lib"}; import "a" as a; def f: a::g;
 def inc($n): . + $n; def twice(f): f | f; twice(inc(1))
 module {name: "example"}; import "lib" as lib; import "data" as $data {search: "./"}; include "helpers"; .
 EOF

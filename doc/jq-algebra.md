@@ -8,7 +8,7 @@ Compared to the AST, the algebra:
 - drops the `term`/`TermType...` wrapping: every expression is an object with a `type`;
 - turns suffixes (`.a.b[0]`, `.[]`, `?`, `as $x | ...`) into ordinary expressions;
 - represents the associative operators `|`, `,` and `//` as a single operator with a flat list of operands;
-- decodes constants (numbers, booleans, strings, module metadata) into plain JSON values.
+- decodes constants (`null`, numbers, booleans, strings, module metadata) into plain JSON values.
 
 The formal definition is the JSON Schema [`schema/jq-algebra.schema.json`](../schema/jq-algebra.schema.json) (draft 2020-12).
 This page describes the same thing with examples.
@@ -57,12 +57,13 @@ Naming conventions shared by all types:
 | `..` | `{"type": "Recurse"}` |
 | `.[]` | `{"type": "Iterator"}` |
 | `.[]?` | `{"type": "Iterator", "optional": true}` |
-| `.a` | `{"type": "Key", "name": "a"}` |
+| `.a`, `."a"` | `{"type": "Key", "name": "a"}` |
+| `."a b"` | `{"type": "Key", "name": "a b"}` |
 | `.a?` | `{"type": "Key", "name": "a", "optional": true}` |
+| `."a\(.b)"` | `{"type": "Key", "query": {"type": "StringInterpolation", ...}}` |
 | `.[q]` | `{"type": "Index", "index": q}` |
 | `.[s:e]`, `.[s:]`, `.[:e]` | `{"type": "Slice", "start": s, "end": e}` (either bound may be missing) |
-| `null` | `{"type": "Null"}` |
-| `42`, `true`, `false`, `"abc"` | `{"type": "Literal", "value": 42}` (`value` is a number, boolean or string) |
+| `null`, `42`, `true`, `false`, `"abc"` | `{"type": "Literal", "value": 42}` (`value` is `null`, a number, a boolean or a string) |
 
 A path such as `.a.b[0]` is a pipe of its components:
 
@@ -78,7 +79,7 @@ A path such as `.a.b[0]` is a pipe of its components:
 }
 ```
 
-`Key` may alternatively have a `query` (an expression computing the key) instead of a `name`.
+`Key` has either a `name` (any string: `.a` and `."a"` are the same) or a `query`, an expression computing the key (the interpolated string of `."a\(.b)"`).
 
 ### Strings and formats
 
@@ -138,9 +139,12 @@ Each entry has one key property and, unless it is a shorthand, a `val` expressio
 | `a` (shorthand for `a: .a`) | `{"key": "a"}` |
 | `$x` (shorthand for `x: $x`) | `{"key": "$x"}` |
 | `$x: v` | `{"key": "$x", "val": v}` |
-| `"a": v` | `{"key_string": {"str": "a"}, "val": v}` |
-| `"a"` (shorthand) | `{"key_string": {"str": "a"}}` |
+| `"a": v` | `{"key_string": {"type": "Literal", "value": "a"}, "val": v}` |
+| `"a"` (shorthand) | `{"key_string": {"type": "Literal", "value": "a"}}` |
+| `"a\(.b)": v` | `{"key_string": {"type": "StringInterpolation", ...}, "val": v}` |
 | `(q): v` | `{"key_query": q, "val": v}` |
+
+`key_string` is a string expression: a `Literal` with a string value or a `StringInterpolation`.
 
 ### Operators
 
@@ -242,8 +246,11 @@ Entries of object patterns:
 | `$x` (binds the value of key `x`) | `{"key": "$x"}` |
 | `$x: p` (binds `$x` and destructures it with `p`) | `{"key": "$x", "val": p}` |
 | `a: p` | `{"key": "a", "val": p}` |
-| `"a": p` | `{"key_string": {"str": "a"}, "val": p}` |
-| `(q): p` | `{"key_query": ..., "val": p}` (`key_query` is the AST of `q`) |
+| `"a": p` | `{"key_string": {"type": "Literal", "value": "a"}, "val": p}` |
+| `"a\(.b)": p` | `{"key_string": {"type": "StringInterpolation", ...}, "val": p}` |
+| `(q): p` | `{"key_query": q, "val": p}` |
+
+As in object construction, `key_string` is a `Literal` string or a `StringInterpolation`, and `key_query` is an expression.
 
 ## Function definitions
 
@@ -276,6 +283,20 @@ twice(inc(1))
 
 A function definition has a `name`, a `body` expression and, if it has parameters, `args`: the list of parameter names, with a leading `$` for value parameters.
 
+A library module, made only of definitions, has no main expression: its root is an object with `func_defs` (and possibly [`meta` and `imports`](#module-directives)) but no `type`.
+
+```jq
+def inc: . + 1;
+```
+
+```json
+{
+  "func_defs": [
+    {"name": "inc", "body": {"type": "BinaryOp", "op": "+", "leftOperand": {"type": "Identity"}, "rightOperand": {"type": "Literal", "value": 1}}}
+  ]
+}
+```
+
 ## Module directives
 
 The module header is attached to the root expression: `meta` for `module {...};` and `imports` for the `import` and `include` directives, in order.
@@ -301,13 +322,19 @@ include "helpers";
 }
 ```
 
+## Serialization
+
+`meta::algebra_tostring` prints an algebra document back as jq text, which parses back to the same algebra.
+As the algebra has no parentheses, it adds them according to the operator priorities, only where they are needed (`(1 + 2) * 3`, `(.a | length) as $n | ...`), and around object values that are not simple terms (`{a: (1 + 2)}`), which jq requires.
+
 ## Known limitations
 
-The conversion is not complete yet; these parts are left as they are in the source AST, and the schema accepts them loosely:
+The algebra is a normalized form of the query, so some details of the source text are not kept:
 
-- interpolated object keys (`{"a\(.b)": 1}`): `key_string` is `{"queries": [...]}` with AST queries;
-- in object patterns, `key_string` and `key_query` (`{"a": $x}`, `{(.k): $x}`) are the AST of the key;
-- a module made only of function definitions, with no main expression, is not supported by `meta::ast_to_algebra`.
+- formatting, comments and redundant parentheses;
+- equivalent forms of the same expression: `.a` and `."a"`, `.a.b` and `.a | .b`, `. | f` and `f`, nested definition scopes (`def f: 1; (def g: 2; g)` is `def f: 1; def g: 2; g`);
+- repeated error suppression: `.a??` is the same as `.a?`;
+- the key order of metadata objects may change, depending on the jq implementation used for the conversion (gojq and fq sort the keys).
 
 ## Validating
 

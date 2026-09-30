@@ -35,7 +35,8 @@ def ast_to_algebra:
             (.operands |= [ .[] |
                 if . == $identity then
                     empty
-                elif .type == "NaryOp" and .op == $op then
+                # operands with `?` or local definitions are kept as they are
+                elif .type == "NaryOp" and .op == $op and (has("optional") or has("func_defs") | not) then
                     .operands[]
                 end
             ]) |
@@ -70,6 +71,18 @@ def ast_to_algebra:
                 {type: "Literal", value: .str}
             end;
 
+        def _pattern:
+            if .array then
+                .array |= [.[] | _pattern]
+            elif .object then
+                .object |= [
+                    .[] |
+                    if .key_string then .key_string |= convert_str end |
+                    if .key_query then .key_query |= _f end |
+                    if .val then .val |= _pattern end
+                ]
+            end;
+
         def _index:
             if .is_slice then
                 . as $source |
@@ -89,10 +102,13 @@ def ast_to_algebra:
                     name: .name
                 }
             elif .str then
-                {
-                    type: "Key",
-                    query: .str | _f
-                }
+                # `."name"` or `."name\(...)"`
+                .str | convert_str |
+                if .type == "Literal" then
+                    {type: "Key", name: .value}
+                else
+                    {type: "Key", query: .}
+                end
             else error("unsupported type of index: \(.)")
             end;
 
@@ -103,7 +119,12 @@ def ast_to_algebra:
         else
             null
         end) as $func_defs |
-        if .term.type then
+        if (.term.type | not) and .op == null then
+            # a module with no main expression (only definitions)
+            if $func_defs or $imports or $module_meta then {}
+            else error("unsupported term: \(.)")
+            end
+        elif .term.type then
             .term | (
                 .type[8:] as $type |
                 del(.type) |
@@ -114,6 +135,8 @@ def ast_to_algebra:
                     if .str then .str |= convert_str end
                 elif $type == "Number" then
                     {type: "Literal", value: .number | tonumber}
+                elif $type == "Null" then
+                    {type: "Literal", value: null}
                 elif $type == "True" then
                     {type: "Literal", value: true}
                 elif $type == "False" then
@@ -133,6 +156,7 @@ def ast_to_algebra:
                 elif $type == "Object" then .object |
                     .key_vals |= [
                         .[] |
+                        if .key_string then .key_string |= convert_str end |
                         if .key_query then .key_query |= _f end |
                         if .val then .val |=
                             if .queries then
@@ -156,6 +180,7 @@ def ast_to_algebra:
                 elif $type == "Reduce" then
                     .reduce |
                         (.query |= _f) |
+                        (.pattern |= _pattern) |
                         (.start |= _f) |
                         (.update |= _f)
                 elif $type == "Foreach" then
@@ -163,6 +188,7 @@ def ast_to_algebra:
                         # older gojq ASTs have a `term` instead of a `query`
                         (.query = ((.query // {term: .term}) | _f)) |
                         del(.term) |
+                        (.pattern |= _pattern) |
                         (.start |= _f) |
                         (.update |= _f) |
                         if .extract then .extract |= _f end
@@ -201,7 +227,7 @@ def ast_to_algebra:
                             type: "Bind",
                             value: . | simplify_op,
                             scope: $suffix_list[-1].bind.body | _f,
-                            patterns: $suffix_list[-1].bind.patterns
+                            patterns: [$suffix_list[-1].bind.patterns[] | _pattern]
                         }
                     end
                 end 
@@ -219,6 +245,7 @@ def ast_to_algebra:
             } end
         else error("unsupported term: \(.)")
         end |
+        simplify_op |
         if $module_meta then
             .meta = $module_meta
         end |
@@ -226,8 +253,8 @@ def ast_to_algebra:
             .imports = $imports
         end |
         if $func_defs then
-            .func_defs = $func_defs
-        end |
-        simplify_op;
+            # `def f: ...; (def g: ...; ...)`, the scopes can be merged
+            .func_defs = $func_defs + (.func_defs // [])
+        end;
 
     _f;

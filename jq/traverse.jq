@@ -1,13 +1,13 @@
 def traverse_expr(visit_expr; visit_pattern; visit_import; visit_func_def):
-    def _pattern:
-        if .array then .array |= [.[] | _pattern]
-        elif .object then .object |= [.[] |
-            if .val then
-                .val |= _pattern
-            end
-        ]
-        end | visit_pattern;
     def _f:
+        def _pattern:
+            if .array then .array |= [.[] | _pattern]
+            elif .object then .object |= [.[] |
+                if .key_string then .key_string |= _f end |
+                if .key_query then .key_query |= _f end |
+                if .val then .val |= _pattern end
+            ]
+            end | visit_pattern;
         if .imports then
             .imports |= [.[] | visit_import]
         end |
@@ -38,6 +38,7 @@ def traverse_expr(visit_expr; visit_pattern; visit_import; visit_func_def):
         elif .type == "Object" then
             .key_vals |= [
                 .[] |
+                if .key_string then .key_string |= _f end |
                 if .key_query then .key_query |= _f end |
                 if .val then .val |=
                     if .queries then

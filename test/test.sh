@@ -76,6 +76,46 @@ for engine in "$@"; do
         check "text to text round trip (fq _query_fromstring)" \
             '.a|.b' \
             "$(run '$q | _query_fromstring | meta::ast_to_algebra | meta::algebra_tostring' -rn --arg q '.a | .b')"
+
+        # query, then its expected serialization (without pretty printing);
+        # the serialization must also be parsed back to the same algebra
+        while IFS=$'\t' read -r query expected; do
+            check "round trip: $query" \
+                "$expected" \
+                "$(run '($q | _query_fromstring | meta::ast_to_algebra) as $a |
+                    ($a | meta::algebra_tostring) as $s |
+                    if ($s | _query_fromstring | meta::ast_to_algebra) == $a then $s
+                    else "\($s) (parsed back to a different algebra)"
+                    end' -rn --arg q "$query")"
+        done <<'EOF'
+(1 + 2) * 3	(1+2)*3
+1 - (2 - 3)	1-(2-3)
+(1 - 2) - 3	1-2-3
+(1, 2) // 3	(1,2)//3
+- (1 + 2)	-(1+2)
+a and (b or c)	a and (b or c)
+.[]?	.[]?
+f?	f?
+.[1]?	.[1]?
+(.a | .b)? | .c	(.a|.b)?|.c
+."a"	.a
+.a."b"	.a|.b
+."a b"	."a b"
+.a."b\(.c)"	.a|."b\(.c)"
+{"a\(.b)": 1, "y\(.)": 2, "c": 3}	{"a\(.b)":1,"y\(.)":2,"c":3}
+{a: 1 + 2, b: -1, c: .d}	{a:(1+2),b:(-1),c:.d}
+"a\"b\(.x)\n"	"a\"b\(.x)\n"
+null	null
+.[] as {"a": $x, "b\(.c)": $y, (.k): $z} ?// [$x] | $x	.[] as {"a":$x,"b\(.c)":$y,(.k):$z} ?// [$x] | $x
+(.a | length) as $n | $n	(.a|length) as $n | $n
+1 + (. as $x | $x)	1+(. as $x | $x)
+reduce (.a | .[]) as $x (0; . + $x)	reduce (.a|.[]) as $x (0;.+$x)
+(try 1) + 2	try 1+2
+try (1 + 2) catch (3 | 4)	try (1+2) catch (3|4)
+1 + (def f: 2; f)	1+(def f: 2; f)
+def f: 1;	def f: 1;
+import "a" as a; def f: a::g;	import "a" as a; def f: a::g;
+EOF
     fi
 done
 
