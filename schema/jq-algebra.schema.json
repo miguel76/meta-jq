@@ -1,0 +1,498 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/miguel76/meta-jq/schema/jq-algebra.schema.json",
+    "title": "jq algebra",
+    "description": "JSON representation of a jq query (a 'program' or 'module'), as produced by `meta::ast_to_algebra` and consumed by `meta::traverse_expr` and `meta::algebra_tostring`. The root of a document is an expression; the module header (`meta`, `imports`) is only meaningful on the root, while `func_defs` may appear on any expression. See doc/jq-algebra.md for a guide.",
+    "$ref": "#/$defs/Expr",
+    "$defs": {
+        "Expr": {
+            "title": "Expression",
+            "description": "A jq expression (filter). The kind of expression is given by `type`.",
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+                "type": {
+                    "enum": [
+                        "Identity", "Recurse", "Iterator",
+                        "Null", "Literal", "StringInterpolation", "Format",
+                        "Key", "Index", "Slice",
+                        "Func", "Object", "Array",
+                        "UnaryOp", "BinaryOp", "NaryOp",
+                        "If", "Reduce", "Foreach", "Try", "Label", "Break", "Bind"
+                    ]
+                },
+                "optional": {
+                    "description": "`true` if the expression is followed by the error suppression operator `?` (e.g. `.a?`, `.[]?`, `f?`).",
+                    "type": "boolean"
+                },
+                "func_defs": {
+                    "description": "Function definitions (`def name: body;`) preceding the expression and visible in it.",
+                    "type": "array",
+                    "items": {"$ref": "#/$defs/FuncDef"}
+                },
+                "meta": {
+                    "description": "Module metadata (`module {...};`). Root expression only.",
+                    "$ref": "#/$defs/Metadata"
+                },
+                "imports": {
+                    "description": "Module directives (`import` and `include`), in order. Root expression only.",
+                    "type": "array",
+                    "items": {"$ref": "#/$defs/Import"}
+                }
+            },
+            "oneOf": [
+                {"$ref": "#/$defs/Identity"},
+                {"$ref": "#/$defs/Recurse"},
+                {"$ref": "#/$defs/Iterator"},
+                {"$ref": "#/$defs/Null"},
+                {"$ref": "#/$defs/Literal"},
+                {"$ref": "#/$defs/StringInterpolation"},
+                {"$ref": "#/$defs/Format"},
+                {"$ref": "#/$defs/Key"},
+                {"$ref": "#/$defs/Index"},
+                {"$ref": "#/$defs/Slice"},
+                {"$ref": "#/$defs/Func"},
+                {"$ref": "#/$defs/Object"},
+                {"$ref": "#/$defs/Array"},
+                {"$ref": "#/$defs/UnaryOp"},
+                {"$ref": "#/$defs/BinaryOp"},
+                {"$ref": "#/$defs/NaryOp"},
+                {"$ref": "#/$defs/If"},
+                {"$ref": "#/$defs/Reduce"},
+                {"$ref": "#/$defs/Foreach"},
+                {"$ref": "#/$defs/Try"},
+                {"$ref": "#/$defs/Label"},
+                {"$ref": "#/$defs/Break"},
+                {"$ref": "#/$defs/Bind"}
+            ],
+            "unevaluatedProperties": false
+        },
+
+        "Identity": {
+            "description": "`.`",
+            "properties": {"type": {"const": "Identity"}}
+        },
+        "Recurse": {
+            "description": "`..`",
+            "properties": {"type": {"const": "Recurse"}}
+        },
+        "Iterator": {
+            "description": "`.[]`: iterates over the values of the input array or object.",
+            "properties": {"type": {"const": "Iterator"}}
+        },
+
+        "Null": {
+            "description": "`null`",
+            "properties": {"type": {"const": "Null"}}
+        },
+        "Literal": {
+            "description": "A constant number, boolean or string without interpolation (e.g. `42`, `true`, `\"abc\"`).",
+            "required": ["value"],
+            "properties": {
+                "type": {"const": "Literal"},
+                "value": {"type": ["number", "boolean", "string"]}
+            }
+        },
+        "StringInterpolation": {
+            "description": "A string with at least one interpolation, e.g. `\"a\\(.x)b\"`.",
+            "required": ["fragments"],
+            "properties": {
+                "type": {"const": "StringInterpolation"},
+                "fragments": {
+                    "type": "array",
+                    "items": {"$ref": "#/$defs/StringFragment"}
+                }
+            }
+        },
+        "StringFragment": {
+            "description": "A piece of an interpolated string.",
+            "oneOf": [
+                {
+                    "title": "FixedString",
+                    "description": "Constant text (with escape sequences decoded).",
+                    "type": "object",
+                    "required": ["type", "value"],
+                    "properties": {
+                        "type": {"const": "FixedString"},
+                        "value": {"type": "string"}
+                    },
+                    "additionalProperties": false
+                },
+                {
+                    "title": "InterpolatedString",
+                    "description": "An interpolation `\\(query)`.",
+                    "type": "object",
+                    "required": ["type", "query"],
+                    "properties": {
+                        "type": {"const": "InterpolatedString"},
+                        "query": {"$ref": "#/$defs/Expr"}
+                    },
+                    "additionalProperties": false
+                }
+            ]
+        },
+        "Format": {
+            "description": "A format string, alone (`@base64`) or applied to a string (`@uri \"x=\\(.x)\"`).",
+            "required": ["format"],
+            "properties": {
+                "type": {"const": "Format"},
+                "format": {
+                    "description": "Format name, including the leading `@`.",
+                    "type": "string",
+                    "pattern": "^@"
+                },
+                "str": {
+                    "description": "The string the format is applied to.",
+                    "$ref": "#/$defs/Expr",
+                    "properties": {
+                        "type": {"enum": ["Literal", "StringInterpolation"]},
+                        "value": {"type": "string"}
+                    }
+                }
+            }
+        },
+
+        "Key": {
+            "description": "Object key access: `.name` or `.[\"name\"]`-like forms with a string query.",
+            "oneOf": [
+                {"required": ["name"], "not": {"required": ["query"]}},
+                {"required": ["query"], "not": {"required": ["name"]}}
+            ],
+            "properties": {
+                "type": {"const": "Key"},
+                "name": {
+                    "description": "Key name, for `.name`.",
+                    "type": "string"
+                },
+                "query": {
+                    "description": "Query computing the key.",
+                    "$ref": "#/$defs/Expr"
+                }
+            }
+        },
+        "Index": {
+            "description": "Generic index `.[query]` (array index or object key, depending on the value).",
+            "required": ["index"],
+            "properties": {
+                "type": {"const": "Index"},
+                "index": {"$ref": "#/$defs/Expr"}
+            }
+        },
+        "Slice": {
+            "description": "Slice `.[start:end]`; either bound may be omitted.",
+            "properties": {
+                "type": {"const": "Slice"},
+                "start": {"$ref": "#/$defs/Expr"},
+                "end": {"$ref": "#/$defs/Expr"}
+            }
+        },
+
+        "Func": {
+            "description": "Function call (`name`, `name(arg1; arg2)`) or variable reference (`$name`, whose `name` starts with `$`).",
+            "required": ["name"],
+            "properties": {
+                "type": {"const": "Func"},
+                "name": {"type": "string"},
+                "args": {
+                    "description": "Arguments, one per `;`-separated argument. Absent for calls without arguments and for variables.",
+                    "type": "array",
+                    "items": {"$ref": "#/$defs/Expr"},
+                    "minItems": 1
+                }
+            }
+        },
+        "Object": {
+            "description": "Object construction `{...}`.",
+            "required": ["key_vals"],
+            "properties": {
+                "type": {"const": "Object"},
+                "key_vals": {
+                    "type": "array",
+                    "items": {"$ref": "#/$defs/ObjectEntry"}
+                }
+            }
+        },
+        "ObjectEntry": {
+            "description": "An entry of an object construction. Exactly one of `key`, `key_string`, `key_query` is present; `val` is absent for shorthand entries (`{a}`, `{$a}`, `{\"a\"}`).",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "description": "Identifier or keyword key (`{a: ...}`, `{if: ...}`) or variable key (`{$a}`, `{$a: ...}`, with the leading `$`).",
+                    "type": "string"
+                },
+                "key_string": {"$ref": "#/$defs/KeyString"},
+                "key_query": {
+                    "description": "Computed key `{(query): ...}`.",
+                    "$ref": "#/$defs/Expr"
+                },
+                "val": {"$ref": "#/$defs/Expr"}
+            },
+            "oneOf": [
+                {"required": ["key"]},
+                {"required": ["key_string"]},
+                {"required": ["key_query"]}
+            ],
+            "additionalProperties": false
+        },
+        "KeyString": {
+            "description": "Quoted key (`{\"a\": ...}`). Only the plain string form `{str}` is converted to algebra: an interpolated key (`{\"a\\(.b)\": ...}`) is currently kept as in the source AST, as `{queries: [...]}`.",
+            "type": "object",
+            "oneOf": [
+                {
+                    "required": ["str"],
+                    "properties": {"str": {"type": "string"}},
+                    "additionalProperties": false
+                },
+                {
+                    "required": ["queries"],
+                    "properties": {"queries": {"type": "array"}},
+                    "additionalProperties": false
+                }
+            ]
+        },
+        "Array": {
+            "description": "Array construction `[query]`; `query` is absent for `[]`.",
+            "properties": {
+                "type": {"const": "Array"},
+                "query": {"$ref": "#/$defs/Expr"}
+            }
+        },
+
+        "UnaryOp": {
+            "description": "Unary operator, e.g. `-.a`.",
+            "required": ["op", "operand"],
+            "properties": {
+                "type": {"const": "UnaryOp"},
+                "op": {"enum": ["-", "+"]},
+                "operand": {"$ref": "#/$defs/Expr"}
+            }
+        },
+        "BinaryOp": {
+            "description": "Binary operator that is not associative (or is not treated as such): arithmetic, comparison, boolean and update-assignment operators.",
+            "required": ["op", "leftOperand", "rightOperand"],
+            "properties": {
+                "type": {"const": "BinaryOp"},
+                "op": {
+                    "enum": [
+                        "*", "/", "%", "+", "-",
+                        "==", "!=", "<", ">", "<=", ">=",
+                        "and", "or",
+                        "=", "|=", "+=", "-=", "*=", "/=", "%=", "//="
+                    ]
+                },
+                "leftOperand": {"$ref": "#/$defs/Expr"},
+                "rightOperand": {"$ref": "#/$defs/Expr"}
+            }
+        },
+        "NaryOp": {
+            "description": "Associative operator applied to a flat list of operands: pipe `|`, comma `,` and alternative `//`. Nested operations with the same operator are flattened, and identity operands (`.` for `|`, `empty` for `,` and `//`) are removed, so there are always at least two operands.",
+            "required": ["op", "operands"],
+            "properties": {
+                "type": {"const": "NaryOp"},
+                "op": {"enum": ["|", ",", "//"]},
+                "operands": {
+                    "type": "array",
+                    "items": {"$ref": "#/$defs/Expr"},
+                    "minItems": 2
+                }
+            }
+        },
+
+        "If": {
+            "description": "`if cond then then (elif cond then then)* (else else)? end`.",
+            "required": ["cond", "then"],
+            "properties": {
+                "type": {"const": "If"},
+                "cond": {"$ref": "#/$defs/Expr"},
+                "then": {"$ref": "#/$defs/Expr"},
+                "elif": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["cond", "then"],
+                        "properties": {
+                            "cond": {"$ref": "#/$defs/Expr"},
+                            "then": {"$ref": "#/$defs/Expr"}
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "else": {"$ref": "#/$defs/Expr"}
+            }
+        },
+        "Reduce": {
+            "description": "`reduce query as pattern (start; update)`.",
+            "required": ["query", "pattern", "start", "update"],
+            "properties": {
+                "type": {"const": "Reduce"},
+                "query": {"$ref": "#/$defs/Expr"},
+                "pattern": {"$ref": "#/$defs/Pattern"},
+                "start": {"$ref": "#/$defs/Expr"},
+                "update": {"$ref": "#/$defs/Expr"}
+            }
+        },
+        "Foreach": {
+            "description": "`foreach query as pattern (start; update)` or `foreach query as pattern (start; update; extract)`.",
+            "required": ["query", "pattern", "start", "update"],
+            "properties": {
+                "type": {"const": "Foreach"},
+                "query": {"$ref": "#/$defs/Expr"},
+                "pattern": {"$ref": "#/$defs/Pattern"},
+                "start": {"$ref": "#/$defs/Expr"},
+                "update": {"$ref": "#/$defs/Expr"},
+                "extract": {"$ref": "#/$defs/Expr"}
+            }
+        },
+        "Try": {
+            "description": "`try body` or `try body catch catch`. The postfix `?` is represented by `optional` instead.",
+            "required": ["body"],
+            "properties": {
+                "type": {"const": "Try"},
+                "body": {"$ref": "#/$defs/Expr"},
+                "catch": {"$ref": "#/$defs/Expr"}
+            }
+        },
+        "Label": {
+            "description": "`label $ident | body`.",
+            "required": ["ident", "body"],
+            "properties": {
+                "type": {"const": "Label"},
+                "ident": {"$ref": "#/$defs/Variable"},
+                "body": {"$ref": "#/$defs/Expr"}
+            }
+        },
+        "Break": {
+            "description": "`break $label`.",
+            "required": ["break"],
+            "properties": {
+                "type": {"const": "Break"},
+                "break": {"$ref": "#/$defs/Variable"}
+            }
+        },
+        "Bind": {
+            "description": "Variable binding `value as patterns | scope`. More than one pattern means destructuring alternatives: `value as p1 ?// p2 | scope`.",
+            "required": ["value", "patterns", "scope"],
+            "properties": {
+                "type": {"const": "Bind"},
+                "value": {"$ref": "#/$defs/Expr"},
+                "patterns": {
+                    "type": "array",
+                    "items": {"$ref": "#/$defs/Pattern"},
+                    "minItems": 1
+                },
+                "scope": {"$ref": "#/$defs/Expr"}
+            }
+        },
+
+        "Pattern": {
+            "title": "Destructuring pattern",
+            "description": "Pattern of `as` bindings (`$x`, `[$a, $b]`, `{a: $x, $y}`). Exactly one of `name`, `array`, `object` is present.",
+            "type": "object",
+            "oneOf": [
+                {
+                    "required": ["name"],
+                    "properties": {"name": {"$ref": "#/$defs/Variable"}},
+                    "additionalProperties": false
+                },
+                {
+                    "required": ["array"],
+                    "properties": {
+                        "array": {
+                            "type": "array",
+                            "items": {"$ref": "#/$defs/Pattern"}
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                {
+                    "required": ["object"],
+                    "properties": {
+                        "object": {
+                            "type": "array",
+                            "items": {"$ref": "#/$defs/ObjectPatternEntry"}
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            ]
+        },
+        "ObjectPatternEntry": {
+            "description": "Entry of an object pattern: `$name` (binds the value of key `name`), `$name: pattern`, `key: pattern`, `\"key\": pattern` or `(query): pattern`. `key_string` and `key_query` are currently kept as in the source AST (not converted to algebra).",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "description": "Identifier or keyword key, or a variable (with the leading `$`).",
+                    "type": "string"
+                },
+                "key_string": {"$ref": "#/$defs/KeyString"},
+                "key_query": {
+                    "description": "Computed key, as in the source AST.",
+                    "type": "object"
+                },
+                "val": {"$ref": "#/$defs/Pattern"}
+            },
+            "oneOf": [
+                {"required": ["key"]},
+                {"required": ["key_string", "val"]},
+                {"required": ["key_query", "val"]}
+            ],
+            "additionalProperties": false
+        },
+
+        "FuncDef": {
+            "title": "Function definition",
+            "description": "`def name: body;` or `def name(arg1; $arg2): body;`.",
+            "type": "object",
+            "required": ["name", "body"],
+            "properties": {
+                "name": {"type": "string"},
+                "args": {
+                    "description": "Parameter names: filter parameters (`f`) or value parameters (`$v`, with the leading `$`).",
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "minItems": 1
+                },
+                "body": {"$ref": "#/$defs/Expr"}
+            },
+            "additionalProperties": false
+        },
+
+        "Import": {
+            "title": "Module directive",
+            "description": "`import \"path\" as alias;`, `import \"path\" as $alias;` (data import) or `include \"path\";`, each optionally followed by metadata.",
+            "type": "object",
+            "oneOf": [
+                {
+                    "required": ["import_path", "import_alias"],
+                    "properties": {
+                        "import_path": {"type": "string"},
+                        "import_alias": {
+                            "description": "Module alias, or data alias with the leading `$`.",
+                            "type": "string"
+                        },
+                        "meta": {"$ref": "#/$defs/Metadata"}
+                    },
+                    "additionalProperties": false
+                },
+                {
+                    "required": ["include_path"],
+                    "properties": {
+                        "include_path": {"type": "string"},
+                        "meta": {"$ref": "#/$defs/Metadata"}
+                    },
+                    "additionalProperties": false
+                }
+            ]
+        },
+
+        "Metadata": {
+            "description": "Module or import metadata, as a plain JSON object (a jq constant object).",
+            "type": "object"
+        },
+        "Variable": {
+            "description": "Variable or label name, including the leading `$`.",
+            "type": "string",
+            "pattern": "^\\$"
+        }
+    }
+}

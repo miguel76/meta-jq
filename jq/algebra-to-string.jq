@@ -204,7 +204,7 @@ def algebra_tostring($space):
             elif .type == "Reduce" then
                 "reduce \(.query) as \(.pattern) (\(.start);\(.update))"
             elif .type == "Foreach" then
-                "foreach \({term: .term}) as \(.pattern) (\(.start);\(.update)\(
+                "foreach \(.query) as \(.pattern) (\(.start);\(.update)\(
                     if .extract then ";\(.extract)" else "" end
                 ))"
             elif .type == "Try" then
