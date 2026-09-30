@@ -97,7 +97,7 @@ def ast_to_algebra:
             end;
 
         (.meta | if . then meta_to_json end) as $module_meta | 
-        (.imports | if . then [.[] | .meta |= meta_to_json] end) as $imports |
+        (.imports | if . then [.[] | if .meta then .meta |= meta_to_json end] end) as $imports |
         (if .func_defs then
             .func_defs | [.[] | .body |= _f]
         else
@@ -160,9 +160,12 @@ def ast_to_algebra:
                         (.update |= _f)
                 elif $type == "Foreach" then
                     .foreach |
-                        (.term |= _f) |
+                        # older gojq ASTs have a `term` instead of a `query`
+                        (.query = ((.query // {term: .term}) | _f)) |
+                        del(.term) |
                         (.start |= _f) |
-                        (.update |= _f)
+                        (.update |= _f) |
+                        if .extract then .extract |= _f end
                 elif $type == "Query" then
                     .query | _f
                 elif $type == "Label" then

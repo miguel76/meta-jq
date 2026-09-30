@@ -58,10 +58,11 @@ def traverse_expr(visit_expr; visit_pattern; visit_import; visit_func_def):
             ] end |
             if .else then .else |= _f end
         elif .type == "Foreach" then
-            (.term |= _f) |
+            (.query |= _f) |
             (.pattern |= _pattern) |
             (.start |= _f) |
-            (.update |= _f)
+            (.update |= _f) |
+            if .extract then .extract |= _f end
         elif .type == "Reduce" then
             (.query |= _f) |
             (.pattern |= _pattern) |

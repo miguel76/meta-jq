@@ -19,6 +19,7 @@ There is currently no established convention on how to represent jq queries as J
 
 This representation has some quirks that complicate direct manipulation.
 We propose a represention that we call __jq algebra__ and it is meant to expose jq structure with a more direct mapping of semantics.
+It is described in [doc/jq-algebra.md](doc/jq-algebra.md) and formally defined by the JSON Schema [schema/jq-algebra.schema.json](schema/jq-algebra.schema.json).
 
 ## Install
 
@@ -92,6 +93,8 @@ It tests the repo itself; set `META_JQ_LIB` (the folder to pass to `-L`) and `ME
 test/test.sh
 META_JQ_LIB=jq_modules META_JQ_MODULE=miguel76/meta-jq path/to/meta-jq/test/test.sh jq gojq fq
 ```
+
+`test/test-schema.sh` validates the algebra of the test data and of a set of sample queries (parsed with fq, if available) against the JSON Schema; it requires Python with the [jsonschema](https://pypi.org/project/jsonschema/) package.
 
 ## Usage
 
